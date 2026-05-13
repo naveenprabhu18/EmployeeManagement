@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/naveenprabhu18/EmployeeManagement.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Build Next.js App') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t employee-management .'
+            }
+        }
+
+        stage('Deploy to Worker Node') {
+            steps {
+                sh '''
+                docker save employee-management > employee-management.tar
+
+                scp -o StrictHostKeyChecking=no employee-management.tar machine2@172.31.37.250:/home/machine2/
+
+                ssh -o StrictHostKeyChecking=no machine2@172.31.37.250 "
+                docker stop employee-management-container || true &&
+                docker rm employee-management-container || true &&
+                docker load < employee-management.tar &&
+                docker run -d -p 3000:3000 --name employee-management-container employee-management
+                "
+                '''
+            }
+        }
+    }
+}
