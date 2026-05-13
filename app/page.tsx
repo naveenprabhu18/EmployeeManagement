@@ -6,7 +6,7 @@ export default function Home() {
      <h1>Employee Management-pr</h1>
      <h2>Test</h2>
      <h2>test 2</h2>
-     <h2>test 3</h2>
+     
     </div>
   );
 }
